@@ -1,1 +1,129 @@
-hola necesito el acceso al repositorio 
+import processing.serial.*;
+
+Serial myPort;
+float roll = 0; // Ángulo de inclinación en el eje X
+float pitch = 0; // Ángulo de inclinación en el eje Y
+float yaw = 0;//Angulo de inclinacion en el eje Z
+String inputData = ""; // Variable para almacenar los datos seriales
+
+//Declararacion de img
+PImage icono1;
+PImage icono2;
+PImage icono3;
+PImage icono4;
+ 
+void setup() {
+  size(1370, 740, P3D);//ventana 3D
+  background(25);
+  smooth();
+  frameRate(60);
+  
+    // Lista de puertos seriales disponibles
+  printArray(Serial.list());
+
+  // Abre el puerto serial (ajusta el puerto según el listado que te muestra el monitor)
+  myPort = new Serial(this, Serial.list()[0], 115200);
+  myPort.bufferUntil('\n'); // Lee datos hasta encontrar un salto de línea
+
+  // Cargar la imagen que está en la carpeta "data"
+  icono1 = loadImage("rocket.png");
+  icono2 = loadImage("line-chart.png");
+  icono3 = loadImage("antena.png");
+  icono4 = loadImage("logo.png");
+  
+}
+void draw() {
+  background(50);
+  noStroke();
+  fill(70);
+  rect(20, 20, 310, 330);/////////Cuadrado 1///PANEL 1
+  fill(130);
+  rect(20, 20, 310, 35);/////////Cuadrado 2///
+  fill(70);
+  rect(340, 20, 700, 330);/////////Cuadrado 3///PANEL 2
+  fill(130);
+  rect(340, 20, 700, 35);/////////Cuadrado 4///
+  fill(70);
+  rect(1050, 20, 310, 700);////////Cuadrado 5///PANEL 3
+  fill(130);
+  rect(1060, 30, 290, 680);////////Cuadrado 6///
+  fill(70);
+  rect(20, 360, 310, 300);/////////Cuadrado 7///PANEL 4///Bajo
+  fill(130);
+  rect(20, 360, 310, 35);//////////Cuadrado 8///
+  fill(70);
+  rect(340, 360, 340, 300);////////Cuadrado 9///PANEL 5
+  fill(70);
+  rect(690, 360, 350, 300);////////Cuadrado 10//PANEL 6
+  rect(20, 670, 1020, 50);/////////Caudrado 11//PANEL 7
+  
+  
+  ////////////////////////////////////////////////////////////LINEAS
+  // Dibujar una línea vertical para separar el panel 2
+  stroke(100);  //Color
+  strokeWeight(1.5);  // Grosor 
+  line(690, 90, 690, 310);  // Línea desde (690, 20) hasta (690, 350)
+
+
+  // Imagenes Cargadas 
+  image(icono1,290, 25, 35, 35);  // Dibuja el ícono a partir de (50, 50), con tamaño 100x100
+  image(icono2,290,360,35,35);
+  image(icono3,700,380,100,100);
+  image(icono4,860,-40,500,250);
+  
+  
+  ////////////////////////////////////////////////////////////////Texto
+  fill(255);
+  textSize(32);
+  textAlign(CENTER, CENTER);
+  text("LAIKA",1200, 60);
+  textSize(32);
+  text("AEROSPACE",1240,90);
+  
+  textSize(25);
+  text("Graficas",80,375);
+  textSize(25);
+  text("ESTATUS",80,35);
+  textSize(25);
+  text("Posición ",400,35);
+  textSize(25);
+  text("Trayectoria del Satélite",820,35);
+  
+
+  ////////////////////////////////////////////////////////////////Graficas 
+  //background(255);
+  fill(0);  // Establece el color de relleno a negro
+  textSize(25);  // Establece el tamaño del texto
+  text("Roll: " + roll, 425, 250);  // Muestra los datos recibidos
+  text("Pitch: " + pitch, 425, 275);  // Muestra los datos recibidos
+  text("Yaw: " + yaw, 425, 300);  // Muestra los datos recibidos
+  
+  lights(); // Agregar luces a la escena
+  translate(1150, 300, 80); // Mover el origen al centro de la ventana
+  rotateX(radians(pitch)); //Rotar según el roll
+  rotateY(radians(yaw)); // Rotar según el pitch
+  rotateZ(radians(roll));//Rotar según el yaw
+
+  // Dibujar figura
+  stroke(0);
+  fill(150, 0, 0, 150);
+  box(50,100,50); // Tamaño 
+}
+////////////////////////////////////////////////////////////////////Entrada serial CVS
+void serialEvent(Serial myPort) {
+  // Leer los datos seriales
+  inputData = myPort.readStringUntil('\n');
+  
+  // Asegurarse de que se reciban datos válidos
+  if (inputData != null) {
+    inputData = trim(inputData); // Eliminar espacios en blanco
+    String[] values = split(inputData, ','); // Dividir los valores CSV
+    
+    // Asegurarse de que haya dos valores (roll y pitch)
+    if (values.length == 3) {
+      roll = int(values[0]); //  valor a float (roll)
+      pitch = int(values[1]); //  valor a float (pitch)
+      yaw = int(values[2]); // valor a float (yaw)
+    }
+  }
+}
